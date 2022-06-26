@@ -13,7 +13,6 @@ class NFQNetwork(nn.Module):
             nn.Linear(5, 5),
             nn.Sigmoid(),
             nn.Linear(5, 1),
-            nn.Sigmoid(),
         )
 
         # Initialize weights to [-0.5, 0.5]
