@@ -96,9 +96,12 @@ class NFQAgent:
             torch.cat([next_state_b, 2 * torch.ones(len(rollouts), 1)], 1)
         ).squeeze()
         q_next_state_b = torch.min(
-            q_next_state_left_b, q_next_state_do_nothing_b, q_next_state_right_b
-        )
-
+            torch.stack(
+                [q_next_state_left_b, q_next_state_do_nothing_b, q_next_state_right_b],
+                dim=1,
+            ),
+            dim=1,
+        )[0]
         # If goal state (S+): target = 0 + gamma * min Q
         # If forbidden state (S-): target = 1
         # If neither: target = c_trans + gamma * min Q
@@ -157,20 +160,23 @@ class NFQAgent:
         episode_length = 0
         obs = eval_env.reset()
         done = False
-        info = {"time_limit": False}
         episode_cost = 0
-        while not done and not info["time_limit"]:
+        count = 0
+        while not done:
             action = self.get_best_action(obs)
+            print("action", action)
             obs, cost, done, info = eval_env.step(action)
             episode_cost += cost
             episode_length += 1
-
+            count += 1
             if render:
                 eval_env.render()
 
-        success = (
-            episode_length == eval_env.max_steps
-            and abs(obs[0]) <= eval_env.x_success_range
-        )
+            if count >= 1000:
+                break
 
+        if count < 1000:
+            success = True
+        else:
+            success = False
         return episode_length, success, episode_cost

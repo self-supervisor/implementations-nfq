@@ -73,13 +73,14 @@ class MountainCarHintEnv(MountainCarEnv):
         episode_cost = 0
         obs = self.reset()
         done = False
+        count = 0
         while not done:
+            count += 1
             if get_best_action:
                 action = get_best_action(obs)
             else:
                 action = self.action_space.sample()
 
-            print("action", action)
             next_obs, cost, done, info = self.step(action)
             rollout.append((obs, action, cost, next_obs, done))
             episode_cost += cost
@@ -87,5 +88,8 @@ class MountainCarHintEnv(MountainCarEnv):
 
             if render:
                 self.render()
+
+            if count >= 1000:
+                break
 
         return rollout, episode_cost
