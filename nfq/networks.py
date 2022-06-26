@@ -8,7 +8,7 @@ class NFQNetwork(nn.Module):
         """Networks for NFQ."""
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(5, 5),
+            nn.Linear(3, 5),
             nn.Sigmoid(),
             nn.Linear(5, 5),
             nn.Sigmoid(),

@@ -43,12 +43,16 @@ class NFQAgent:
         q_left = self._nfq_net(
             torch.cat([torch.FloatTensor(obs), torch.FloatTensor([0])], dim=0)
         )
-        q_right = self._nfq_net(
+        q_do_nothing = self._nfq_net(
             torch.cat([torch.FloatTensor(obs), torch.FloatTensor([1])], dim=0)
         )
-
+        q_right = self._nfq_net(
+            torch.cat([torch.FloatTensor(obs), torch.FloatTensor([2])], dim=0)
+        )
+        values = [q_left, q_do_nothing, q_right]
+        action = values.index(min(values))
         # Best action has lower "Q" value since it estimates cumulative cost.
-        return 1 if q_left >= q_right else 0
+        return action
 
     def generate_pattern_set(
         self,
@@ -85,10 +89,15 @@ class NFQAgent:
         q_next_state_left_b = self._nfq_net(
             torch.cat([next_state_b, torch.zeros(len(rollouts), 1)], 1)
         ).squeeze()
-        q_next_state_right_b = self._nfq_net(
+        q_next_state_do_nothing_b = self._nfq_net(
             torch.cat([next_state_b, torch.ones(len(rollouts), 1)], 1)
         ).squeeze()
-        q_next_state_b = torch.min(q_next_state_left_b, q_next_state_right_b)
+        q_next_state_right_b = self._nfq_net(
+            torch.cat([next_state_b, 2 * torch.ones(len(rollouts), 1)], 1)
+        ).squeeze()
+        q_next_state_b = torch.min(
+            q_next_state_left_b, q_next_state_do_nothing_b, q_next_state_right_b
+        )
 
         # If goal state (S+): target = 0 + gamma * min Q
         # If forbidden state (S-): target = 1

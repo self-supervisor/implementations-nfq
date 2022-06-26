@@ -53,10 +53,11 @@ import configargparse
 import torch
 import torch.optim as optim
 
-from environments import CartPoleRegulatorEnv
+from environments import MountainCarHintEnv
 from nfq.agents import NFQAgent
 from nfq.networks import NFQNetwork
 from utils import get_logger, load_models, make_reproducible, save_models
+import gym
 
 
 def main():
@@ -118,8 +119,8 @@ def main():
         wandb.init(project="implementations-nfq", config=CONFIG)
 
     # Setup environment
-    train_env = CartPoleRegulatorEnv(mode="train")
-    eval_env = CartPoleRegulatorEnv(mode="eval")
+    train_env = MountainCarHintEnv()
+    eval_env = MountainCarHintEnv()
 
     # Fix random seeds
     if CONFIG.RANDOM_SEED is not None:
